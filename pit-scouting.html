@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pit Scouting ● FRC 1792</title>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header>
+    <div class="topbar">
+        <div class="brand">
+            <a href="index.html" class="logo-link">
+                <img src="images/logo.svg" alt="FRC 1792 Logo" class="header-logo" onerror="this.onerror=null; this.src='images/favicon.ico';">
+            </a>
+            <div class="brand-text">
+                <div class="t1">1792 Pit Scouting ● 2026 REBUILT</div>
+                <div class="t2">Team Info → Robot Design → Submit</div>
+            </div>
+        </div>
+        <div class="pill">
+            <span id="netDot" class="dot"></span>
+            <span id="netText">Offline</span>
+        </div>
+    </div>
+</header>
+
+<div id="demoBanner" class="demo-bar" style="display:none;">
+    <span>Demo Mode — submissions and input validation are disabled</span>
+    <a href="index.html" class="demo-bar-exit">Exit Demo</a>
+</div>
+
+<main>
+    <div class="card">
+        <div class="hd">
+            <div style="flex: 1;">
+                <div class="progress">
+                    <div class="step" data-step="0"></div>
+                    <div class="step" data-step="1"></div>
+                </div>
+                <h2 id="screenTitle">Team Information</h2>
+                <p id="screenSubtitle">Enter scout and team details</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn small ghost" id="btnHome" onclick="window.location.href='index.html'">← Home</button>
+                <button class="btn small ghost" id="btnReset">Reset</button>
+            </div>
+        </div>
+
+        <div class="bd">
+            <!-- Screen 0: Team Info -->
+            <section class="screen" data-screen="0">
+                <div class="grid">
+                    <div class="col-6">
+                        <label>Scout name *</label>
+                        <input id="scoutName" placeholder="e.g., Elijah" autocomplete="name" />
+                    </div>
+
+                    <div class="col-6">
+                        <label>Team # *</label>
+                        <div class="autocomplete-wrapper">
+                            <input id="teamSearch" type="text" placeholder="Type team # or name..." autocomplete="off" />
+                            <div id="autocompleteResults" class="autocomplete-results"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Team name</label>
+                        <input id="teamName" placeholder="Auto-filled from selection above" readonly style="opacity: 0.7;" />
+                    </div>
+
+                    <div class="col-12" id="queueAlert" style="display:none">
+                        <div class="alert warning">
+                            ⚠️ You have <span id="queueCount">0</span> queued submissions.
+                            <button class="btn small" id="btnResend" style="margin-left: 10px">Resend All</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Screen 1: Robot Design -->
+            <section class="screen" data-screen="1" style="display:none">
+                <div class="grid">
+                    <div class="col-6">
+                        <label>Drivetrain type *</label>
+                        <select id="drivetrain">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Tank">Tank Drive</option>
+                            <option value="Mecanum">Mecanum</option>
+                            <option value="Swerve">Swerve Drive</option>
+                            <option value="H-Drive">H-Drive</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="col-6">
+                        <label>Motor type *</label>
+                        <select id="motorType">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="NEO">NEO</option>
+                            <option value="NEO 550">NEO 550</option>
+                            <option value="Falcon 500">Falcon 500</option>
+                            <option value="Kraken">Kraken</option>
+                            <option value="CIM">CIM</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Robot dimensions (inches) *</label>
+                        <div class="row">
+                            <div style="flex: 1;">
+                                <input id="width" type="number" placeholder="Width" min="0" step="0.5" inputmode="decimal" />
+                            </div>
+                            <span style="color: var(--muted);">×</span>
+                            <div style="flex: 1;">
+                                <input id="length" type="number" placeholder="Length" min="0" step="0.5" inputmode="decimal" />
+                            </div>
+                            <span style="color: var(--muted);">×</span>
+                            <div style="flex: 1;">
+                                <input id="height" type="number" placeholder="Height" min="0" step="0.5" inputmode="decimal" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Programming language *</label>
+                        <select id="programmingLang">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Java">Java</option>
+                            <option value="C++">C++</option>
+                            <option value="Python">Python</option>
+                            <option value="LabVIEW">LabVIEW</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Can climb tower? *</label>
+                        <div class="seg" id="canClimbSeg">
+                            <div class="chip" data-value="No">No</div>
+                            <div class="chip" data-value="L1">Level 1</div>
+                            <div class="chip" data-value="L2">Level 2</div>
+                            <div class="chip" data-value="L3">Level 3</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Hopper? *</label>
+                        <div class="seg" id="hopperSeg">
+                            <div class="chip" data-value="Yes">Yes</div>
+                            <div class="chip" data-value="No">No</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12" id="hopperDimensionsContainer" style="display:none">
+                        <label>Hopper dimensions (inches) *</label>
+                        <div class="row">
+                            <div style="flex: 1;">
+                                <input id="hopperLength" type="number" placeholder="Length" min="0" step="0.5" inputmode="decimal" />
+                            </div>
+                            <span style="color: var(--muted);">×</span>
+                            <div style="flex: 1;">
+                                <input id="hopperWidth" type="number" placeholder="Width" min="0" step="0.5" inputmode="decimal" />
+                            </div>
+                            <span style="color: var(--muted);">×</span>
+                            <div style="flex: 1;">
+                                <input id="hopperHeight" type="number" placeholder="Height" min="0" step="0.5" inputmode="decimal" />
+                            </div>
+                        </div>
+                        <div class="counter" id="ballCapacityDisplay" style="background: rgba(33,197,93,.08); border-color: rgba(33,197,93,.25); margin-top: 12px; display:none;">
+                            <div class="meta">
+                                <div class="name">Estimated Ball Capacity (auto-calculated)</div>
+                                <div class="desc">Based on 5.91" diameter fuel and 64% packing efficiency</div>
+                            </div>
+                            <div class="ctl">
+                                <div class="count" id="ballCapacityValue" style="color: var(--ok); font-size: 1.4rem;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Special features / mechanisms *</label>
+                        <textarea id="specialFeatures" placeholder="Describe any unique robot features, mechanisms, or capabilities..."></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Robot photo *</label>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn ghost" id="btnTakePhoto">📷 Take Photo</button>
+                            <button type="button" class="btn ghost" id="btnChoosePhoto">🖼️ Choose File</button>
+                            <button type="button" class="btn ghost" id="btnClearPhoto" style="display:none">🗑️ Clear</button>
+                        </div>
+                        <!-- Mobile camera input (iPhone/Android) - uses native camera -->
+                        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
+                        <!-- File chooser for existing photos -->
+                        <input type="file" id="fileInput" accept="image/*,image/heic,image/heif" style="display:none" />
+                        <div id="photoPreview" style="display:none; margin-top: 12px;">
+                            <img id="photoPreviewImg" style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid var(--border);" alt="Robot photo preview" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="nav">
+            <div class="left">
+                <button class="btn ghost" id="btnBack">Back</button>
+            </div>
+            <div class="right">
+                <button class="btn ghost" id="btnNext">Next</button>
+                <button class="btn primary" id="btnSubmit" style="display:none">Submit</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Camera Modal -->
+<div id="cameraModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:none;">
+    <div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+        <button id="closeCameraBtn" style="position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.2); border:none; color:white; font-size:24px; width:40px; height:40px; border-radius:50%; cursor:pointer;">×</button>
+        <video id="cameraVideo" autoplay playsinline style="max-width:90%; max-height:70vh; border-radius:8px; background:#000;"></video>
+        <div style="margin-top:20px; display:flex; gap:12px;">
+            <button id="capturePhotoBtn" class="btn primary" style="font-size:18px; padding:12px 24px;">📷 Capture Photo</button>
+            <button id="cancelCameraBtn" class="btn ghost" style="font-size:18px; padding:12px 24px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/pit-scouting.js"></script>
+</body>
+</html>

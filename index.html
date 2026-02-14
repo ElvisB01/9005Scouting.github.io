@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FRC 1792 Scouting ● 2026 REBUILT</title>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header>
+    <div class="topbar">
+        <div class="brand">
+            <img src="images/logo.svg" alt="FRC 1792 Logo" class="header-logo" onerror="this.onerror=null; this.src='images/favicon.ico';">
+            <div class="brand-text">
+                <div class="t1">1792 Scouting ● 2026 REBUILT</div>
+                <div class="t2" id="headerSubtitle">Enter your team code</div>
+            </div>
+        </div>
+        <div class="pill">
+            <span id="netDot" class="dot"></span>
+            <span id="netText">Offline</span>
+        </div>
+    </div>
+</header>
+
+<main style="padding: 60px 16px;">
+    <div style="max-width: 720px; margin: 0 auto;">
+
+        <!-- ===== PHASE 1: Code Entry ===== -->
+        <div id="phaseAuth">
+            <div style="text-align: center; margin-bottom: 48px;">
+                <img src="images/logo.svg" alt="FRC 1792 Logo" onerror="this.onerror=null; this.src='images/favicon.ico';" style="width: 96px; height: 96px; margin-bottom: 24px; filter: drop-shadow(0 4px 12px rgba(0, 57, 162, 0.5));">
+                <h1 style="font-size: 2.2rem; font-family: var(--font-header); font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0; letter-spacing: 0.8px;">
+                    FRC 1792 SCOUTING
+                </h1>
+                <p style="color: var(--muted); font-size: 1rem; margin: 0;">
+                    Enter your team code to begin scouting
+                </p>
+            </div>
+
+            <!-- Code input -->
+            <div style="max-width: 400px; margin: 0 auto;">
+                <div id="codeInputWrap" style="margin-bottom: 16px;">
+                    <input type="password" id="secretCode" placeholder="Team code" autocomplete="off"
+                           style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;">
+                </div>
+                <div id="codeError" style="color: var(--danger); text-align: center; font-size: 0.9rem; margin-bottom: 12px; display: none;">
+                    Incorrect code. Try again.
+                </div>
+                <button id="btnEnter" class="btn primary" style="width: 100%; height: 52px; font-size: 1.1rem; margin-bottom: 20px;">
+                    Enter
+                </button>
+
+                <!-- Divider -->
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                    <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                    <span style="color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">or</span>
+                    <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                </div>
+
+                <!-- Demo button -->
+                <button id="btnDemo" class="btn ghost" style="width: 100%; height: 52px; font-size: 1.05rem;">
+                    Demo Mode
+                </button>
+                <p style="text-align: center; color: var(--muted); font-size: 0.85rem; margin-top: 10px; opacity: 0.7;">
+                    Explore the app without submitting data
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== PHASE 2: Mode Selector ===== -->
+        <div id="phaseSelect" style="display: none;">
+            <!-- Demo banner -->
+            <div id="demoBanner" class="demo-bar" style="margin-bottom: 24px; display: none; border-radius: 12px;">
+                <span>You are in demo mode — submissions are disabled</span>
+                <button id="btnExitDemo" class="demo-bar-exit" style="background: none; border: none; cursor: pointer; font-family: var(--font-body); font-size: 0.9rem;">Exit Demo</button>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 60px;">
+                <img src="images/logo.svg" alt="FRC 1792 Logo" onerror="this.onerror=null; this.src='images/favicon.ico';" style="width: 96px; height: 96px; margin-bottom: 24px; filter: drop-shadow(0 4px 12px rgba(0, 57, 162, 0.5));">
+                <h1 style="font-size: 2.2rem; font-family: var(--font-header); font-weight: 600; text-transform: uppercase; margin: 0 0 8px 0; letter-spacing: 0.8px;">
+                    FRC 1792 SCOUTING
+                </h1>
+                <p style="color: var(--muted); font-size: 1rem; margin: 0;">
+                    Select a scouting mode to begin
+                </p>
+            </div>
+
+            <!-- Scouting Mode Cards -->
+            <div style="display: grid; gap: 20px; margin-bottom: 40px;">
+                <a href="match-scouting.html" class="mode-card">
+                    <div class="mode-icon">🤖</div>
+                    <div class="mode-content">
+                        <h2>Match Scouting</h2>
+                        <p>Track robot performance during competition matches</p>
+                    </div>
+                    <div class="mode-arrow">→</div>
+                </a>
+
+                <a href="pit-scouting.html" class="mode-card">
+                    <div class="mode-icon">🔧</div>
+                    <div class="mode-content">
+                        <h2>Pit Scouting</h2>
+                        <p>Collect robot capabilities and team information</p>
+                    </div>
+                    <div class="mode-arrow">→</div>
+                </a>
+            </div>
+
+            <!-- Exit session (authenticated users only, demo uses banner button) -->
+            <div id="logoutWrap" style="text-align: center;">
+                <button id="btnLogout" class="btn ghost small" style="opacity: 0.6;">
+                    Exit Session
+                </button>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<style>
+    .mode-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 24px;
+        background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .mode-card:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+        border-color: var(--accent);
+        box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+
+    .mode-card:active {
+        transform: translateY(0);
+    }
+
+    .mode-icon {
+        font-size: 2.5rem;
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 57, 162, 0.2);
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+
+    .mode-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .mode-content h2 {
+        margin: 0 0 6px 0;
+        font-size: 1.3rem;
+        font-family: var(--font-header);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .mode-content p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+        font-family: var(--font-body);
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    .mode-arrow {
+        font-size: 1.5rem;
+        color: var(--accent);
+        opacity: 0.6;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .mode-card:hover .mode-arrow {
+        opacity: 1;
+        transform: translateX(4px);
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-8px); }
+        40% { transform: translateX(8px); }
+        60% { transform: translateX(-6px); }
+        80% { transform: translateX(6px); }
+    }
+
+    .shake {
+        animation: shake 0.4s ease;
+    }
+
+    @media (max-width: 600px) {
+        .mode-icon {
+            width: 56px;
+            height: 56px;
+            font-size: 2rem;
+        }
+
+        .mode-content h2 {
+            font-size: 1.15rem;
+        }
+
+        .mode-content p {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<script src="js/config.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>
