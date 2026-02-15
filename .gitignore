@@ -1,5 +1,4 @@
-# Config file with sensitive data (API keys, webhook URLs, team codes)
-js/config.js
+
 
 # macOS
 .DS_Store
