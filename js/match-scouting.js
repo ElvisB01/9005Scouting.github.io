@@ -339,6 +339,18 @@
     function validateAuto(){
         if (state.startPos === null){ toast("⚠️ Select where robot starts"); return false; }
         if (!$("autoFuel").value){ toast("⚠️ Select auto fuel range"); return false; }
+
+        // Validate at least one fuel source checkbox is checked
+        const fuelSources = $("fuelNeutralZone").checked || $("fuelOutpost").checked ||
+                           $("fuelDepot").checked || $("fuelFloor").checked;
+        if (!fuelSources){ toast("⚠️ Select at least one fuel source"); return false; }
+
+        // Validate bump/trench
+        const bumpTrench = $("autoBumpOver").checked || $("autoTrenchUnder").checked ||
+                          $("autoBumpTrenchNone").checked;
+        if (!bumpTrench){ toast("⚠️ Select bump/trench option"); return false; }
+
+        if (state.autoShuttling === null){ toast("⚠️ Select shuttling during auto"); return false; }
         if (state.autoTower === null){ toast("⚠️ Select auto tower level"); return false; }
         return true;
     }
@@ -347,6 +359,17 @@
         const shuttling = $("shuttling").value;
 
         if (!$("teleopFuelActive").value){ toast("⚠️ Select teleop fuel (active hub) range"); return false; }
+
+        // Validate at least one teleop fuel source checkbox is checked
+        const teleopFuelSources = $("teleopFuelNeutralZone").checked || $("teleopFuelOutpost").checked ||
+                                 $("teleopFuelDepot").checked || $("teleopFuelFloor").checked;
+        if (!teleopFuelSources){ toast("⚠️ Select at least one teleop fuel source"); return false; }
+
+        // Validate at least one inactive activity checkbox is checked
+        const inactiveActivity = $("inactivePlayedDefense").checked || $("inactiveShuttledFuel").checked ||
+                                $("inactiveBlockedBumpTrench").checked || $("inactiveCollectingFuel").checked;
+        if (!inactiveActivity){ toast("⚠️ Select at least one inactive activity"); return false; }
+
         if (!shuttling){ toast("⚠️ Select shuttling rating"); return false; }
         return true;
     }
@@ -366,6 +389,8 @@
         if (state.affectedByDefense === null){ toast("⚠️ Select if team was affected by defense"); return false; }
         if (!status){ toast("⚠️ Select robot status"); return false; }
         if (!defense){ toast("⚠️ Select defense rating"); return false; }
+        if (state.crossedBump === null){ toast("⚠️ Select if robot crossed bump"); return false; }
+        if (state.crossedTrench === null){ toast("⚠️ Select if robot crossed under trench"); return false; }
         if (state.rank === null){ toast("⚠️ Rank this robot"); return false; }
         if (!submitCode){ toast("⚠️ Enter submit code to authorize submission"); return false; }
         return true;
