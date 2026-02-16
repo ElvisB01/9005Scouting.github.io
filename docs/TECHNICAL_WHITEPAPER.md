@@ -1,278 +1,158 @@
-# FRC 1792 Scouting System - Technical Whitepaper
+# Technical Whitepaper
 
-**Last Updated:** February 10, 2026
+Web app for collecting robot data at FRC competitions. Data submits to Google Sheets. Works offline.
 
----
-
-## What Is This?
-
-A web app that lets scouts collect robot data at FRC competitions. Two modes:
-- **Match Scouting** - Record what robots do during matches
-- **Pit Scouting** - Document robot specs and take photos
-
-Data goes to Google Sheets for analysis. Works offline.
-
----
-
-## How It All Connects
+## Architecture
 
 ```
-Scouts on phones/tablets
-        |
-        v
-  GitHub Pages Website
-  (HTML + CSS + JS)
-        |
-        v
-Google Apps Script ──> Google Sheets (data)
-                   ──> Google Drive (photos)
-
-The Blue Alliance API ──> Loads team lists
+Scouts → GitHub Pages (HTML/CSS/JS) → Google Apps Script → Sheets/Drive
+         The Blue Alliance API → Team lists
 ```
-
----
 
 ## File Structure
 
 ```
-├── index.html                  # Home page
-├── match-scouting.html         # Match form
-├── pit-scouting.html           # Pit form
-├── css/styles.css              # All styling
+├── index.html, match-scouting.html, pit-scouting.html
+├── css/styles.css
 ├── js/
-│   ├── config.js               # Shared settings (edit this one!)
-│   ├── home.js                 # Home page logic
-│   ├── match-scouting.js       # Match form logic
-│   └── pit-scouting.js         # Pit form logic
+│   ├── config.js           # Settings (edit this!)
+│   ├── home.js, match-scouting.js, pit-scouting.js
 ├── appScript/
-│   └── combined-scouting-script.js  # Google backend
-└── images/                     # Logo, field, tower diagrams
+│   └── combined-scouting-script.js  # Backend
+└── images/
 ```
 
----
+## Authentication & Security
 
-## Authentication & Security System
+**Goal:** Public site, protected submissions.
 
-**Goal:** Keep the site public for open alliance while preventing unauthorized data submissions.
+**Client-Side:**
+- Home page: enter secret code or click "Demo Mode"
+- Valid code → saves `{ authenticated: true, teamCode }` in `sessionStorage`
+- Demo mode → saves `{ demo: true }` in `sessionStorage`
+- Session expires when tab closes
 
-### How It Works
+**Scouting Pages:**
+- Check session on load, redirect if missing
+- Demo mode: disable validation, block submissions, show banner
+- Add `teamCode` to all payloads
 
-**Client-Side (js/home.js, js/config.js):**
-1. Home page shows a code entry screen
-2. User enters secret code OR clicks "Demo Mode"
-3. Valid code → stores `{ authenticated: true, teamCode: "code" }` in `sessionStorage`
-4. Demo mode → stores `{ demo: true }` in `sessionStorage`
-5. Session expires when browser tab closes (uses `sessionStorage`, not `localStorage`)
+**Server-Side:**
+- `ALLOWED_CODES` array in Apps Script
+- Rejects submissions without valid `teamCode`
+- Real security layer (webhook URL is public, but server validates)
 
-**Scouting Pages (match-scouting.js, pit-scouting.js):**
-1. Check `sessionStorage` on load — redirect to home if no session
-2. Show demo banner if in demo mode
-3. In demo mode: skip all input validation, block all submissions
-4. Add `teamCode` field to every payload
+**Demo Mode:**
+- Disables validation
+- Blocks submissions
+- Shows "Exit Demo" banner
+- Perfect for open alliance
 
-**Server-Side (combined-scouting-script.js):**
-1. `ALLOWED_CODES` array lists valid team codes
-2. `doPost()` checks incoming `data.teamCode` against allowed codes
-3. Missing or invalid code → reject with error, don't write to sheet
-4. Valid code → proceed with writing data
+## Configuration
 
-### Demo Mode Features
-
-- Disables input validation — users can click through all screens freely
-- Blocks submissions with toast: "Submissions are disabled in demo mode"
-- Shows amber warning banner at top of every scouting page with "Exit Demo" button
-- Banner text: "Demo Mode — submissions and input validation are disabled"
-- Perfect for open alliance — other teams can explore your full scouting setup
-- Session persists across scouting pages but expires when tab closes
-
-### Security Layers
-
-| Layer | What It Does |
-|-------|-------------|
-| Client-side code entry | Prevents casual unauthorized access |
-| Session expiration | Clears access when tab closes |
-| Redirect guard | Blocks direct URL access to scouting pages |
-| Server-side validation | **Real security** — rejects payloads without valid `teamCode` |
-
-**Why the webhook URL is public:** It's in `js/config.js` on GitHub, but that's okay. The server validates every request, so even if someone bypasses the client, they can't submit without a valid code.
-
----
-
-## Configuration Reference
-
-Every season (or new event), open **`js/config.js`** — it's the single file that holds all shared settings:
-
+**js/config.js** (shared settings):
 ```javascript
 const SCOUTING_CONFIG = {
-    WEBHOOK_URL: "your-google-apps-script-url/exec",
-    TBA_API_KEY: "your-blue-alliance-api-key",
-    EVENT_KEY: "2026wiapp",  // your event code
+    WEBHOOK_URL: "your-apps-script-url/exec",
+    TBA_API_KEY: "your-tba-key",
+    EVENT_KEY: "2026wiapp",
     ENABLE_TEAM_LOADING: true,
-    SECRET_CODE: "rtr1792"  // client-side gate (change this!)
+    SECRET_CODE: "rtr1792"
 };
 ```
 
-Both `match-scouting.js` and `pit-scouting.js` read from this file automatically.
-
-Also update:
-- Team numbers in `match-scouting.html` (search for `<option value=`)
-- `ALLOWED_CODES` in `appScript/combined-scouting-script.js` (server-side security):
-
+**appScript/combined-scouting-script.js** (server-side):
 ```javascript
-const ALLOWED_CODES = ["rtr1792", "ally1259", "ally5414"];
+const ALLOWED_CODES = ["rtr1792", "ally1259"];
 ```
 
-**Important:** After editing the Apps Script, you must **redeploy** it (Deploy → New deployment) for changes to take effect.
+After editing Apps Script, **redeploy**.
 
----
+## How It Works
 
-## How Match Scouting Works
+**Match Scouting (5 screens):**
+1. Start → Auto → Teleop → Endgame → Submit
+2. Validates each screen
+3. Sends JSON to Apps Script
+4. Writes row to "Match Scouting Data" sheet
+5. If offline, saves to localStorage for later
 
-**5 screens:** Start → Auto → Teleop → Endgame → Misc/Submit
+**Pit Scouting (2 screens):**
+1. Team Info → Robot Design
+2. Takes photo (mobile camera/webcam/file picker)
+3. Resizes to 1920px, compresses to JPEG
+4. Sends base64 to Apps Script
+5. Uploads to Google Drive, inserts `=IMAGE()` in sheet
 
-Each screen validates before letting you continue. When submitted:
-1. Builds a JSON payload with all form data
-2. Sends it to Google Apps Script via POST
-3. Apps Script writes a row to the "Match Scouting Data" sheet
-4. If offline, data saves to browser localStorage and can be resent later
+**Offline Mode:**
+- Detects connection status
+- Queues failed submissions in localStorage
+- Shows "Resend All" button when online
+- Prevents duplicates
 
-**Key columns in the sheet:** Timestamp, Scout, Event, Match #, Team #, Alliance, Auto Fuel, Auto Tower, Teleop Fuel, Endgame Tower, Defense, Comments, Estimated Points.
+**Team Loading:**
+- Fetches from The Blue Alliance API
+- Caches in localStorage
+- Falls back to cache if API fails
 
-**Bump/Trench Checkbox Behavior:**
-- User can select "Over Bump" and/or "Under Trench" (one or both)
-- Selecting either automatically unchecks "None"
-- Selecting "None" automatically unchecks both others
-- This mutual exclusion is handled by event listeners in `match-scouting.js`
+## Apps Script Backend
 
----
+One script handles both forms:
+- `doPost(e)` – routes by `scoutingType`
+- `writeToSheetMatch(data)` – writes match data
+- `writeToSheetPit(data)` – writes pit data + photo
+- `initializeSheets()` – creates sheets with headers
 
-## How Pit Scouting Works
+## Storage Keys
 
-**2 screens:** Team Info → Robot Design
+**localStorage:**
+- `teamsCache_2026wiapp` – team list
+- `scoutQueue_1792_rebuilt_2026` – match queue
+- `scoutQueue_1792_pit_2026` – pit queue
 
-Collects: drivetrain, motors, dimensions, programming language, climb ability, hopper, special features, and a robot photo.
-
-**Photo handling:**
-- Mobile: Opens native camera app
-- Desktop: Opens webcam via browser API
-- Fallback: File picker
-- Images are resized to max 1920px and compressed to JPEG (85% quality)
-- Sent as base64 in the payload
-
-**On the backend:**
-1. Apps Script decodes the base64 image
-2. Uploads it to a Google Drive folder ("FRC 1792 Robot Photos")
-3. Inserts an `=IMAGE()` formula in the sheet so the photo displays inline
-
----
-
-## How Offline Mode Works
-
-1. App detects connection via `navigator.onLine`
-2. Green/red dot shows status in the header
-3. If submit fails, data saves to `localStorage` as a queue
-4. A yellow alert shows how many items are queued
-5. User clicks "Resend All" when back online
-6. Duplicate detection prevents sending the same entry twice
-
-**localStorage keys:**
-- `teamsCache_2026wiapp` - cached team list
-- `scoutQueue_1792_rebuilt_2026` - match queue
-- `scoutQueue_1792_pit_2026` - pit queue
-
-**sessionStorage keys:**
-- `scoutSession` - auth state `{ authenticated: true, teamCode: "..." }` or `{ demo: true }`
-- Expires when browser tab closes (not browser-wide, only that tab)
-
----
-
-## How Team Loading Works
-
-1. On page load, checks localStorage for cached teams
-2. Fetches fresh team list from The Blue Alliance API
-3. Updates cache with new data
-4. If API fails, uses cached data
-5. Autocomplete search filters by team number or name
-
----
-
-## Google Apps Script Backend
-
-Lives in `appScript/combined-scouting-script.js`. One script handles both forms.
-
-**Main functions:**
-- `doPost(e)` - Receives submissions, routes by `scoutingType` field
-- `writeToSheetMatch(data)` - Writes match data (39 columns)
-- `writeToSheetPit(data)` - Writes pit data + uploads photo (18 columns)
-- `initializeSheets()` - Creates sheets with headers
-- `clearMatchData()` / `clearPitData()` - Clears data but keeps headers
-
-**To deploy/redeploy:**
-1. Open Google Sheet → Extensions → Apps Script
-2. Paste the script code
-3. Deploy → New deployment → Web app → Execute as Me → Anyone can access
-4. Copy the URL (ends with `/exec`)
-
----
+**sessionStorage:**
+- `scoutSession` – auth state (expires on tab close)
 
 ## Styling
 
-All in `css/styles.css`. Uses CSS custom properties for theming:
-
+CSS custom properties in `css/styles.css`:
 ```css
---bg: #1a1a1a;           /* Dark background */
---accent: #0039a2;        /* Team blue */
---accent-light: #89cff0;  /* Light blue highlights */
---ok: #21c55d;            /* Green (success) */
---danger: #ff3b3b;        /* Red (errors) */
+--bg: #1a1a1a;
+--accent: #0039a2;
+--ok: #21c55d;
+--danger: #ff3b3b;
 ```
 
-Fonts: Oswald for headers, Calibri for body text.
+## Adding Form Fields
 
----
+1. Add HTML input
+2. Add to `state` object (if needed)
+3. Add validation
+4. Add to `buildPayload()`
+5. Add column to Apps Script `writeToSheet___()` function
+6. Update sheet headers
 
-## Adding or Changing Form Fields
+## Troubleshooting
 
-1. Add HTML input in the `.html` file
-2. Add to `state` object in the JS file (if needed)
-3. Add validation in the `validate___()` function
-4. Add to `buildPayload()` function
-5. Add column in Google Apps Script `writeToSheet___()` function
-6. Update sheet headers (or delete sheet and let script recreate it)
-
----
-
-## Common Fixes
-
-| Problem | Solution |
-|---------|----------|
-| Teams don't load | Check `TBA_API_KEY` and `EVENT_KEY` in `js/config.js` |
-| Submit fails | Check `WEBHOOK_URL` in `js/config.js` ends with `/exec` and Apps Script is deployed to "Anyone" |
-| "Invalid team code" | Add the code to `ALLOWED_CODES` in Apps Script, then redeploy |
-| Secret code rejected | Verify `SECRET_CODE` in `js/config.js` matches what scouts are entering |
-| Redirected to home | Session expired (tab closed) or no secret code entered — re-enter code |
-| Demo mode allows submit | Bug — demo should show toast blocking submission. Check `IS_DEMO` logic |
-| Camera won't open | Must be HTTPS. Grant browser permission. Try file picker instead |
-| Photo missing in sheet | Check Apps Script logs (Executions tab) for errors |
-| Data in wrong sheet tab | Check `scoutingType: "PIT"` is set in pit scouting payload |
-| Queue won't resend | Verify internet. Check console (F12) for errors |
-
-**Debugging:** Open browser console (F12) to see logs. Check Apps Script editor → Executions for backend errors.
-
----
+| Problem | Fix |
+|---------|-----|
+| Teams don't load | Check `TBA_API_KEY` and `EVENT_KEY` |
+| Submit fails | Check `WEBHOOK_URL` ends `/exec`, deployed to "Anyone" |
+| "Invalid team code" | Update `ALLOWED_CODES`, redeploy |
+| Code rejected | Check `SECRET_CODE` matches |
+| Redirect to home | Session expired, re-enter code |
+| Camera won't open | Needs HTTPS and permission |
+| Photo missing | Check Apps Script logs |
+| Queue won't resend | Check internet, console (F12) |
 
 ## Event Day Checklist
 
 - [ ] Update `EVENT_KEY` in `js/config.js`
-- [ ] Verify `SECRET_CODE` is set and shared with scouts only
-- [ ] Confirm `ALLOWED_CODES` in Apps Script is updated and redeployed
-- [ ] Test a submission from a phone with the secret code
-- [ ] Test demo mode works (blocks submissions, shows banner)
-- [ ] Check data appears in Google Sheet
-- [ ] Bookmark site on all scout devices
-- [ ] Brief scouts on:
-  - How to enter the secret code (first time only per session)
-  - How to use the forms
-  - What to do if offline (data saves automatically)
-- [ ] Check for queued data every few matches
-- [ ] Download sheet backup at end of day
+- [ ] Set `SECRET_CODE` and `ALLOWED_CODES`, redeploy
+- [ ] Test submission with secret code
+- [ ] Test demo mode (blocks submissions)
+- [ ] Verify data in Google Sheet
+- [ ] Bookmark site on scout devices
+- [ ] Brief scouts on usage
+- [ ] Check queued data periodically
+- [ ] Backup sheet at end of day

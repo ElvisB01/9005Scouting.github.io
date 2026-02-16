@@ -2,108 +2,75 @@
 
 <img src="images/logo.svg" alt="FRC 1792 Logo" width="120"/>
 
-# FRC 1792 Scouting ● 2026 REBUILT
+# FRC 1792 Scouting ● 2026
 
-A web-based scouting application for FIRST Robotics Competition Team 1792.
+Web-based scouting application for FIRST Robotics Competition Team 1792.
 
-**Live at:** [princerodrick59.github.io](https://princerodrick59.github.io)
+**Live at:** [frc1792.github.io](https://frc1792.github.io)
 
 </div>
 
----
-
 ## What It Does
 
-Track robot performance during FRC competitions with two scouting modes:
+Track robot performance during FRC competitions:
 
-- **🤖 Match Scouting** – Record robot actions during matches (auto, teleop, endgame)
-- **🔧 Pit Scouting** – Document robot specs, drivetrain, dimensions, and capabilities
+- **🤖 Match Scouting** – Record robot actions during matches
+- **🔧 Pit Scouting** – Document robot specs and capabilities
 
-Data is automatically submitted to Google Sheets for analysis.
-
----
+Data submits automatically to Google Sheets for analysis.
 
 ## Features
 
-- **🔒 Secret code authentication** — Protects submissions while keeping the site public for open alliance
-- **🎮 Demo mode** — Lets anyone explore the full app without submitting data
+- **Secret code authentication** – Protects submissions while keeping site public
+- **Demo mode** – Explore the app without submitting data
 - Multi-step forms with progress tracking
-- Team search powered by The Blue Alliance API
-- Automatic data submission to Google Sheets
-- **Server-side validation** — Rejects submissions without valid team codes
-- Works offline, submits when online
-- Prevents duplicate team submissions with caching
-- Mobile-friendly design
-- Visual field position selectors
-
----
+- Team search via The Blue Alliance API
+- Server-side validation
+- Works offline
+- Mobile-friendly
 
 ## How to Use
 
-**For Scouts (with team code):**
-1. Go to [princerodrick59.github.io](https://princerodrick59.github.io)
-2. Enter your **team code** (provided by your team lead)
-3. Choose **Match Scouting** or **Pit Scouting**
-4. Fill out the form
-5. Click **Submit** – data goes straight to Google Sheets
+**Scouts:**
+1. Visit [frc1792.github.io](https://frc1792.github.io)
+2. Enter your team code
+3. Choose Match or Pit Scouting
+4. Fill out the form and submit
 
-**For Other Teams (demo mode):**
-1. Go to [princerodrick59.github.io](https://princerodrick59.github.io)
-2. Click **Demo Mode** to explore without submitting data
-3. Browse all forms and features freely (input validation disabled)
-4. Click **Exit Demo** when done
-
----
-
-## Tech Stack
-
-- **HTML/CSS/JavaScript** – No frameworks, just vanilla web standards
-- **Google Apps Script** – Handles form submissions and writes to Sheets
-- **The Blue Alliance API** – Loads team lists from events
-- **GitHub Pages** – Free hosting
-
----
+**Demo Mode:**
+Click **Demo Mode** on the home page to explore freely without submitting data.
 
 ## Setup for Your Team
 
-See the **[Quick Start Guide](docs/QUICK_START_GUIDE.md)** for full step-by-step setup instructions.
+See [Quick Start Guide](docs/QUICK_START_GUIDE.md) for detailed setup.
 
-**Short version:**
+**Quick steps:**
+1. Fork this repo
+2. Set up Google Sheets + Apps Script
+3. Edit `js/config.js` with your settings
+4. Update `appScript/combined-scouting-script.js` with team codes
+5. Enable GitHub Pages
 
-1. Fork/clone this repo
-2. Set up Google Sheets + Apps Script backend
-3. Edit **`js/config.js`** with your webhook URL, TBA API key, event code, and secret code
-4. Update **`appScript/combined-scouting-script.js`** with allowed team codes
-5. Update team numbers in `match-scouting.html`
-6. Push to GitHub and enable GitHub Pages
+## Tech Stack
 
----
+Vanilla HTML/CSS/JavaScript • Google Apps Script • The Blue Alliance API • GitHub Pages
 
 ## Documentation
 
-- **[Quick Start Guide](docs/QUICK_START_GUIDE.md)** — Get running in 30 minutes
-- **[Technical Whitepaper](docs/TECHNICAL_WHITEPAPER.md)** — How everything works under the hood
-
----
+- [Quick Start Guide](docs/QUICK_START_GUIDE.md) – Setup in 30 minutes
+- [Technical Whitepaper](docs/TECHNICAL_WHITEPAPER.md) – Architecture details
 
 ## Project Structure
 
 ```
-├── index.html              # Home page with mode selection
-├── match-scouting.html     # Match scouting form
-├── pit-scouting.html       # Pit scouting form
-├── css/
-│   └── styles.css          # Team 1792 branded styles
+├── index.html, match-scouting.html, pit-scouting.html
+├── css/styles.css
 ├── js/
-│   ├── config.js           # Shared settings (edit this one!)
-│   ├── home.js
-│   ├── match-scouting.js   # Match form logic
-│   └── pit-scouting.js     # Pit form logic
+│   ├── config.js           # Edit this for your team
+│   ├── home.js, match-scouting.js, pit-scouting.js
 ├── appScript/
-│   └── combined-scouting-script.js  # Google Sheets backend
-└── docs/                   # Documentation
+│   └── combined-scouting-script.js  # Backend
+└── docs/
 ```
-
----
 
 **Built for FRC Team 1792 • 2026 Season**

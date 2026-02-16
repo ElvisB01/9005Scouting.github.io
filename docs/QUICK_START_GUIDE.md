@@ -1,128 +1,96 @@
 # Quick Start Guide
 
-Get the scouting system running in 30 minutes.
+Get running in 30 minutes.
 
----
+## Prerequisites
 
-## Step 1: Get Your Accounts Ready
+- GitHub account
+- Google account
+- Blue Alliance account (thebluealliance.com)
 
-You need:
-- A **GitHub** account
-- A **Google** account
-- A **Blue Alliance** account (thebluealliance.com)
-
----
-
-## Step 2: Set Up Google Sheets Backend
+## Step 1: Set Up Google Backend
 
 1. Create a new Google Sheet
 2. Go to **Extensions → Apps Script**
-3. Delete the default code
-4. Copy everything from `appScript/combined-scouting-script.js` and paste it in
-5. Save
-6. Click **Deploy → New deployment**
-7. Type: **Web app** | Execute as: **Me** | Access: **Anyone**
-8. Click Deploy, authorize it, and **copy the URL** (ends with `/exec`)
+3. Delete default code and paste everything from `appScript/combined-scouting-script.js`
+4. **Deploy → New deployment**
+   - Type: **Web app**
+   - Execute as: **Me**
+   - Access: **Anyone**
+5. Authorize and **copy the URL** (ends with `/exec`)
 
----
+## Step 2: Get The Blue Alliance API Key
 
-## Step 3: Get a Blue Alliance API Key
-
-1. Go to thebluealliance.com/account
-2. Under "Read API Keys", add a new key
+1. Visit thebluealliance.com/account
+2. Under "Read API Keys", create new key
 3. **Copy the key**
 
----
+## Step 3: Configure Settings
 
-## Step 4: Plug In Your Settings
-
-Open **`js/config.js`** and configure these settings:
+**Edit `js/config.js`:**
 
 ```javascript
 const SCOUTING_CONFIG = {
-    WEBHOOK_URL: "paste-your-apps-script-url-here",
-    TBA_API_KEY: "paste-your-tba-key-here",
-    EVENT_KEY: "2026wiapp",  // change to your event
+    WEBHOOK_URL: "paste-apps-script-url-here",
+    TBA_API_KEY: "paste-tba-key-here",
+    EVENT_KEY: "2026wiapp",  // your event code from TBA
     ENABLE_TEAM_LOADING: true,
-    SECRET_CODE: "rtr1792"  // change to your team's secret code
+    SECRET_CODE: "rtr1792"  // change this
 };
 ```
 
-**Important:**
-- Find your event code at thebluealliance.com — it's the last part of the event URL (e.g., `2026wiapp`)
-- **SECRET_CODE** — Choose a code scouts will use to access scouting. Share this only with your team and allied teams.
-- Update your team numbers in `match-scouting.html` (search for `<option value=`)
-
----
-
-## Step 4.5: Configure Server-Side Security
-
-Open **`appScript/combined-scouting-script.js`** and update the allowed codes array:
+**Edit `appScript/combined-scouting-script.js`:**
 
 ```javascript
-const ALLOWED_CODES = ["rtr1792"];  // Add codes for allied teams
+const ALLOWED_CODES = ["rtr1792"];  // add allied team codes if needed
 ```
 
-**Example for multi-team alliances:**
-```javascript
-const ALLOWED_CODES = ["rtr1792", "ally1259", "ally5414"];
-```
+After editing Apps Script, **redeploy** (Deploy → New deployment).
 
-This ensures only authorized teams can submit data, even if someone bypasses the client-side code entry.
+**Also update:**
+- Team numbers in `match-scouting.html` (search for `<option value=`)
 
-After editing, **redeploy** the Apps Script (Deploy → New deployment) for changes to take effect.
+## Step 4: Deploy to GitHub Pages
 
----
-
-## Step 5: Deploy to GitHub Pages
-
-1. Push your changes to GitHub
+1. Push changes to GitHub
 2. Go to repo **Settings → Pages**
-3. Set source to **Deploy from a branch**, branch to **main**, folder to **/**
-4. Click Save and wait a few minutes, then visit your site
+3. Set source to **main** branch, folder **/**
+4. Save and wait a few minutes
 
-For detailed instructions see the official GitHub Pages docs:
-- [Creating a GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
-- [Configuring a publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
+## Step 5: Test
 
----
-
-## Step 6: Test
-
-1. Open the site on your phone
-2. Submit a test match scouting form — check Google Sheet for the data
-3. Submit a test pit scouting form with a photo — check Sheet for data + photo
-4. Turn on airplane mode, submit, turn it off, click "Resend All" — data should appear
-
----
+1. Open site on your phone
+2. Submit test match and pit forms
+3. Verify data in Google Sheet
+4. Test offline mode: airplane mode → submit → go online → "Resend All"
 
 ## For Scouts
 
-**First Time Setup:**
-1. Open the site and enter your **team code** (ask your team lead if you don't have it)
-2. The code is saved for your browser session — you'll need to re-enter it if you close the tab
+**Setup:**
+Enter team code on first visit (saved in session, re-enter if tab closes)
 
-**Match Scouting:** Pick Match Scouting → Enter your name → pick team → watch match → fill out 5 screens → submit.
+**Match Scouting:**
+Pick mode → enter name → select team → fill 5 screens → submit
 
-**Pit Scouting:** Pick Pit Scouting → Enter your name → pick team → go to their pit → ask questions → take photo → submit.
+**Pit Scouting:**
+Pick mode → enter name → select team → take photo → submit
 
-**If offline:** Data saves automatically. Click "Resend All" when you're back online.
+**Offline:**
+Data saves automatically. Click "Resend All" when online.
 
-**Demo Mode (for other teams):** Click "Demo Mode" on the home screen to explore the app without submitting data. Perfect for open alliance sharing.
-
----
+**Demo Mode:**
+Click "Demo Mode" to explore without submitting.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| Teams don't load | Check API key and event code in `js/config.js` |
-| Submit fails | Check webhook URL ends with `/exec`, Apps Script deployed to "Anyone" |
-| "Invalid team code" error | Update `ALLOWED_CODES` in Apps Script, then redeploy |
-| Wrong code won't accept | Check `SECRET_CODE` in `js/config.js` matches what scouts are typing |
-| Demo mode allows submit | This is a bug — demo mode should block submissions with a toast message |
-| Camera won't open | Needs HTTPS. Allow permission. Use file picker as backup |
-| 404 on GitHub Pages | Wait 5 min. Clear cache. Check Settings → Pages is enabled |
-| Redirects to home page | Session expired (tab was closed) or secret code not entered |
+| Teams don't load | Check `TBA_API_KEY` and `EVENT_KEY` in `js/config.js` |
+| Submit fails | Verify webhook URL ends `/exec`, Apps Script deployed to "Anyone" |
+| "Invalid team code" | Update `ALLOWED_CODES` in Apps Script, redeploy |
+| Secret code rejected | Check `SECRET_CODE` in `js/config.js` |
+| Redirect to home | Session expired or no code entered |
+| Camera won't open | Needs HTTPS and permission |
+| 404 on Pages | Wait 5 min, check Settings → Pages enabled |
 
-Open browser console (F12) to see error details.
+Press F12 for browser console errors.
