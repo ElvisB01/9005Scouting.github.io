@@ -17,6 +17,7 @@
  * 11. Use this SAME URL in both match-scouting.js AND pit-scouting.js
  */
 
+
 // Configuration
 const MATCH_SHEET_NAME = "Match Scouting Data";
 const PIT_SHEET_NAME = "Pit Scouting Data";
