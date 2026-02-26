@@ -34,19 +34,16 @@
         loadedTeams: [],
         startPos: null,
         climbPos: null,
-        autoBumpOver: false,
-        autoTrenchUnder: false,
-        autoBumpTrenchNone: false,
         autoShuttling: null,
         autoTower: null,
         teleopTower: null,
         shotInHub: null,
         affectedByDefense: null,
-        crossedBump: null,
-        crossedTrench: null,
         excessivePenalties: null,
-        autoCycles: [],
-        teleopCycles: [],
+        autoFuel: 0,
+        activeShift1Fuel: 0,
+        activeShift2Fuel: 0,
+        endgameFuel: 0,
     };
 
     const $ = (id) => document.getElementById(id);
@@ -122,36 +119,26 @@
         $("shuttling").value = "";
         $("defenseRating").value = "";
         $("robotStatus").value = "";
-        $("fuelNeutralZone").checked = false;
-        $("fuelOutpost").checked = false;
-        $("fuelDepot").checked = false;
-        $("fuelFloor").checked = false;
-        $("teleopFuelNeutralZone").checked = false;
-        $("teleopFuelOutpost").checked = false;
-        $("teleopFuelDepot").checked = false;
-        $("teleopFuelFloor").checked = false;
         if ($("inactivePlayedDefense")) $("inactivePlayedDefense").checked = false;
         if ($("inactiveShuttledFuel")) $("inactiveShuttledFuel").checked = false;
         if ($("inactiveBlockedBumpTrench")) $("inactiveBlockedBumpTrench").checked = false;
         if ($("inactiveCollectingFuel")) $("inactiveCollectingFuel").checked = false;
 
-        state.autoCycles = [];
-        state.teleopCycles = [];
-        renderCycles('auto');
-        renderCycles('teleop');
+        state.autoFuel = 0;
+        state.activeShift1Fuel = 0;
+        state.activeShift2Fuel = 0;
+        state.endgameFuel = 0;
+        renderFuelCounters();
 
         state.startPos = null;
         state.climbPos = null;
-        if ($("autoBumpOver")) $("autoBumpOver").checked = false;
-        if ($("autoTrenchUnder")) $("autoTrenchUnder").checked = false;
-        if ($("autoBumpTrenchNone")) $("autoBumpTrenchNone").checked = false;
+        const climbWrap = $("climbSelectorWrapper");
+        if (climbWrap) climbWrap.style.display = "none";
         state.autoShuttling = null;
         state.autoTower = null;
         state.teleopTower = null;
         state.shotInHub = null;
         state.affectedByDefense = null;
-        state.crossedBump = null;
-        state.crossedTrench = null;
         state.excessivePenalties = null;
 
         if ($("autoEffectiveness")) $("autoEffectiveness").value = "";
@@ -168,26 +155,31 @@
         showScreen(0);
     }
 
-    // Calculate total fuel points from cycles
-    function calculateCycleFuelPoints(cycles) {
-        return cycles.reduce((total, cycle) => {
-            // Points = hopper fill % * accuracy %
-            return total + (cycle.hopperFill * cycle.accuracy / 100);
-        }, 0);
+    // Fuel counter display keys mapped to element IDs
+    const FUEL_DISPLAY = {
+        autoFuel:         "autoFuelVal",
+        activeShift1Fuel: "shift1FuelVal",
+        activeShift2Fuel: "shift2FuelVal",
+        endgameFuel:      "endgameFuelVal",
+    };
+
+    function renderFuelCounters() {
+        for (const [key, elId] of Object.entries(FUEL_DISPLAY)) {
+            const el = $(elId);
+            if (el) el.textContent = state[key];
+        }
     }
 
-    // Bump/Trench mutual exclusion: "None" clears the others, and vice versa
-    $("autoBumpOver").addEventListener("change", function() {
-        if (this.checked) $("autoBumpTrenchNone").checked = false;
-    });
-    $("autoTrenchUnder").addEventListener("change", function() {
-        if (this.checked) $("autoBumpTrenchNone").checked = false;
-    });
-    $("autoBumpTrenchNone").addEventListener("change", function() {
-        if (this.checked) {
-            $("autoBumpOver").checked = false;
-            $("autoTrenchUnder").checked = false;
-        }
+    function adjustFuel(key, delta) {
+        state[key] = Math.max(0, state[key] + delta);
+        const el = $(FUEL_DISPLAY[key]);
+        if (el) el.textContent = state[key];
+    }
+
+    document.querySelectorAll(".fuel-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            adjustFuel(btn.dataset.key, Number(btn.dataset.d));
+        });
     });
 
     function renderSegments(){
@@ -212,12 +204,6 @@
         document.querySelectorAll("#affectedByDefenseSeg .chip").forEach(ch=>{
             ch.classList.toggle("active", ch.dataset.value === state.affectedByDefense);
         });
-        document.querySelectorAll("#crossedBumpSeg .chip").forEach(ch=>{
-            ch.classList.toggle("active", ch.dataset.value === state.crossedBump);
-        });
-        document.querySelectorAll("#crossedTrenchSeg .chip").forEach(ch=>{
-            ch.classList.toggle("active", ch.dataset.value === state.crossedTrench);
-        });
         document.querySelectorAll("#excessivePenaltiesSeg .chip").forEach(ch=>{
             ch.classList.toggle("active", ch.dataset.value === state.excessivePenalties);
         });
@@ -225,120 +211,6 @@
             ch.classList.toggle("active", ch.dataset.value === state.rank);
         });
     }
-
-    // Cycle management functions
-    function addCycle(type) {
-        const maxCycles = 20;
-        const cycles = type === 'auto' ? state.autoCycles : state.teleopCycles;
-
-        if (cycles.length >= maxCycles) {
-            toast(`⚠️ Maximum ${maxCycles} cycles reached`);
-            return;
-        }
-
-        cycles.push({ hopperFill: 0, accuracy: 0 });
-        renderCycles(type);
-    }
-
-    function removeCycle(type, index) {
-        const cycles = type === 'auto' ? state.autoCycles : state.teleopCycles;
-        cycles.splice(index, 1);
-        renderCycles(type);
-    }
-
-    function updateCycle(type, index, field, value) {
-        const cycles = type === 'auto' ? state.autoCycles : state.teleopCycles;
-        if (cycles[index]) {
-            cycles[index][field] = Number(value);
-        }
-    }
-
-    function renderCycles(type) {
-        const cycles = type === 'auto' ? state.autoCycles : state.teleopCycles;
-        const container = type === 'auto' ? $('autoCyclesContainer') : $('teleopCyclesContainer');
-
-        if (cycles.length === 0) {
-            container.innerHTML = '<div class="note">No cycles added yet. Click "+ Add Cycle" below.</div>';
-            return;
-        }
-
-        container.innerHTML = cycles.map((cycle, index) => `
-            <div class="cycle-row" style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                <div style="flex: 0 0 auto; font-weight: 600; color: var(--fg2); min-width: 70px;">
-                    Cycle ${index + 1}
-                </div>
-                <div style="flex: 1;">
-                    <label style="font-size: 0.85rem; margin-bottom: 4px; display: block;">Hopper Fill %</label>
-                    <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="1"
-                        value="${cycle.hopperFill}"
-                        class="cycle-hopper-input"
-                        data-type="${type}"
-                        data-index="${index}"
-                        placeholder="0-100"
-                        inputmode="numeric"
-                    />
-                </div>
-                <div style="flex: 1;">
-                    <label style="font-size: 0.85rem; margin-bottom: 4px; display: block;">Accuracy</label>
-                    <select
-                        class="cycle-accuracy-select"
-                        data-type="${type}"
-                        data-index="${index}"
-                    >
-                        <option value="0" ${cycle.accuracy === 0 ? 'selected' : ''}>0%</option>
-                        <option value="25" ${cycle.accuracy === 25 ? 'selected' : ''}>25%</option>
-                        <option value="50" ${cycle.accuracy === 50 ? 'selected' : ''}>50%</option>
-                        <option value="75" ${cycle.accuracy === 75 ? 'selected' : ''}>75%</option>
-                        <option value="100" ${cycle.accuracy === 100 ? 'selected' : ''}>100%</option>
-                    </select>
-                </div>
-                <button
-                    type="button"
-                    class="btn small ghost"
-                    style="flex: 0 0 auto;"
-                    onclick="window.removeCycle_${type}(${index})"
-                >
-                    ✕
-                </button>
-            </div>
-        `).join('');
-
-        // Add event listeners for the inputs
-        container.querySelectorAll('.cycle-hopper-input').forEach(input => {
-            input.addEventListener('input', (e) => {
-                const type = e.target.dataset.type;
-                const index = Number(e.target.dataset.index);
-                let value = Number(e.target.value);
-
-                // Clamp value between 0-100
-                if (value < 0) value = 0;
-                if (value > 100) value = 100;
-                e.target.value = value;
-
-                updateCycle(type, index, 'hopperFill', value);
-            });
-        });
-
-        container.querySelectorAll('.cycle-accuracy-select').forEach(select => {
-            select.addEventListener('change', (e) => {
-                const type = e.target.dataset.type;
-                const index = Number(e.target.dataset.index);
-                updateCycle(type, index, 'accuracy', e.target.value);
-            });
-        });
-    }
-
-    // Make remove functions available globally for onclick handlers
-    window.removeCycle_auto = (index) => removeCycle('auto', index);
-    window.removeCycle_teleop = (index) => removeCycle('teleop', index);
-
-    // Add cycle button event listeners
-    $('addAutoCycle').addEventListener('click', () => addCycle('auto'));
-    $('addTeleopCycle').addEventListener('click', () => addCycle('teleop'));
 
     document.querySelectorAll("#fieldSelector .field-position").forEach(pos=>{
         pos.addEventListener("click", ()=>{
@@ -367,6 +239,12 @@
     document.querySelectorAll("#teleopTowerSeg .chip").forEach(ch=>{
         ch.addEventListener("click", ()=>{
             state.teleopTower = ch.dataset.value;
+            const climbWrap = $("climbSelectorWrapper");
+            if (climbWrap) {
+                const hasClimb = ch.dataset.value !== "NONE";
+                climbWrap.style.display = hasClimb ? "block" : "none";
+                if (!hasClimb) state.climbPos = null;
+            }
             renderSegments();
         });
     });
@@ -379,18 +257,6 @@
     document.querySelectorAll("#affectedByDefenseSeg .chip").forEach(ch=>{
         ch.addEventListener("click", ()=>{
             state.affectedByDefense = ch.dataset.value;
-            renderSegments();
-        });
-    });
-    document.querySelectorAll("#crossedBumpSeg .chip").forEach(ch=>{
-        ch.addEventListener("click", ()=>{
-            state.crossedBump = ch.dataset.value;
-            renderSegments();
-        });
-    });
-    document.querySelectorAll("#crossedTrenchSeg .chip").forEach(ch=>{
-        ch.addEventListener("click", ()=>{
-            state.crossedTrench = ch.dataset.value;
             renderSegments();
         });
     });
@@ -435,18 +301,6 @@
 
     function validateAuto(){
         if (state.startPos === null){ toast("⚠️ Select where robot starts"); return false; }
-        if (state.autoCycles.length === 0){ toast("⚠️ Add at least one auto fuel cycle"); return false; }
-
-        // Validate at least one fuel source checkbox is checked
-        const fuelSources = $("fuelNeutralZone").checked || $("fuelOutpost").checked ||
-                           $("fuelDepot").checked || $("fuelFloor").checked;
-        if (!fuelSources){ toast("⚠️ Select at least one fuel source"); return false; }
-
-        // Validate bump/trench
-        const bumpTrench = $("autoBumpOver").checked || $("autoTrenchUnder").checked ||
-                          $("autoBumpTrenchNone").checked;
-        if (!bumpTrench){ toast("⚠️ Select bump/trench option"); return false; }
-
         if (state.autoShuttling === null){ toast("⚠️ Select shuttling during auto"); return false; }
         if (state.autoTower === null){ toast("⚠️ Select auto tower level"); return false; }
         return true;
@@ -454,13 +308,6 @@
 
     function validateTeleop(){
         const shuttling = $("shuttling").value;
-
-        if (state.teleopCycles.length === 0){ toast("⚠️ Add at least one teleop fuel cycle"); return false; }
-
-        // Validate at least one teleop fuel source checkbox is checked
-        const teleopFuelSources = $("teleopFuelNeutralZone").checked || $("teleopFuelOutpost").checked ||
-                                 $("teleopFuelDepot").checked || $("teleopFuelFloor").checked;
-        if (!teleopFuelSources){ toast("⚠️ Select at least one teleop fuel source"); return false; }
 
         // Validate at least one inactive activity checkbox is checked
         const inactiveActivity = $("inactivePlayedDefense").checked || $("inactiveShuttledFuel").checked ||
@@ -473,7 +320,6 @@
 
     function validateEndgame(){
         if (state.teleopTower === null){ toast("⚠️ Select endgame tower level"); return false; }
-        if (state.climbPos === null && state.teleopTower !== "NONE"){ toast("⚠️ Select where robot climbed on tower"); return false; }
         if (state.shotInHub === null){ toast("⚠️ Select shot in hub"); return false; }
         return true;
     }
@@ -486,8 +332,6 @@
         if (state.affectedByDefense === null){ toast("⚠️ Select if team was affected by defense"); return false; }
         if (!status){ toast("⚠️ Select robot status"); return false; }
         if (!defense){ toast("⚠️ Select defense rating"); return false; }
-        if (state.crossedBump === null){ toast("⚠️ Select if robot crossed bump"); return false; }
-        if (state.crossedTrench === null){ toast("⚠️ Select if robot crossed under trench"); return false; }
         if (state.rank === null){ toast("⚠️ Rank this robot"); return false; }
         if (!submitCode){ toast("⚠️ Enter submit code to authorize submission"); return false; }
         return true;
@@ -686,25 +530,14 @@
             alliance: getVal("alliance"),
 
             startPos: state.startPos || "",
-            autoCycles: state.autoCycles,
-            autoFuelPoints: calculateCycleFuelPoints(state.autoCycles),
+            autoFuel: state.autoFuel,
             autoTower: state.autoTower || "NONE",
             autoTowerPoints: towerPointsAuto(state.autoTower),
 
-            teleopCycles: state.teleopCycles,
-            teleopFuelPoints: calculateCycleFuelPoints(state.teleopCycles),
-            fuelNeutralZone: $("fuelNeutralZone").checked,
-            fuelOutpost: $("fuelOutpost").checked,
-            fuelDepot: $("fuelDepot").checked,
-            fuelFloor: $("fuelFloor").checked,
-            autoBumpOver: $("autoBumpOver").checked,
-            autoTrenchUnder: $("autoTrenchUnder").checked,
-            autoBumpTrenchNone: $("autoBumpTrenchNone").checked,
+            activeShift1Fuel: state.activeShift1Fuel,
+            activeShift2Fuel: state.activeShift2Fuel,
+            endgameFuel: state.endgameFuel,
             autoShuttling: state.autoShuttling || "",
-            teleopFuelNeutralZone: $("teleopFuelNeutralZone").checked,
-            teleopFuelOutpost: $("teleopFuelOutpost").checked,
-            teleopFuelDepot: $("teleopFuelDepot").checked,
-            teleopFuelFloor: $("teleopFuelFloor").checked,
             inactivePlayedDefense: $("inactivePlayedDefense") ? $("inactivePlayedDefense").checked : false,
             inactiveShuttledFuel: $("inactiveShuttledFuel") ? $("inactiveShuttledFuel").checked : false,
             inactiveBlockedBumpTrench: $("inactiveBlockedBumpTrench") ? $("inactiveBlockedBumpTrench").checked : false,
@@ -716,9 +549,6 @@
             climbPos: state.climbPos || "",
             shotInHub: state.shotInHub || "",
             affectedByDefense: state.affectedByDefense || "",
-            crossedBump: state.crossedBump || "",
-            crossedTrench: state.crossedTrench || "",
-            excessivePenalties: state.excessivePenalties || "",
             autoEffectiveness: getVal("autoEffectiveness"),
             teleopActiveEffectiveness: getVal("teleopActiveEffectiveness"),
             teleopInactiveEffectiveness: getVal("teleopInactiveEffectiveness"),
@@ -894,8 +724,7 @@
     }
 
     renderSegments();
-    renderCycles('auto');
-    renderCycles('teleop');
+    renderFuelCounters();
     showScreen(0);
 
     loadTeams();

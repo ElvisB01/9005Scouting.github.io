@@ -104,7 +104,6 @@
         state.selectedTeamName = "";
 
         $("drivetrain").value = "";
-        $("motorType").value = "";
         $("width").value = "";
         $("length").value = "";
         $("height").value = "";
@@ -427,7 +426,6 @@
 
     function validateRobotDesign(){
         const drivetrain = $("drivetrain").value;
-        const motorType = $("motorType").value;
         const programmingLang = $("programmingLang").value;
         const width = $("width").value.trim();
         const length = $("length").value.trim();
@@ -435,7 +433,6 @@
         const specialFeatures = $("specialFeatures").value.trim();
 
         if (!drivetrain){ toast("⚠️ Select drivetrain type"); return false; }
-        if (!motorType){ toast("⚠️ Select motor type"); return false; }
 
         // Robot dimensions are required
         if (!width || !length || !height) {
@@ -668,7 +665,6 @@
             teamName: state.selectedTeamName,
 
             drivetrain: getVal("drivetrain"),
-            motorType: getVal("motorType"),
             width: getVal("width"),
             length: getVal("length"),
             height: getVal("height"),
@@ -693,7 +689,6 @@
             return item.scoutName === payload.scoutName &&
                    item.teamNumber === payload.teamNumber &&
                    item.drivetrain === payload.drivetrain &&
-                   item.motorType === payload.motorType &&
                    item.width === payload.width &&
                    item.length === payload.length &&
                    item.height === payload.height &&

@@ -139,53 +139,19 @@
                     </div>
 
                     <div class="col-12">
-                        <label>Auto Fuel Cycles (max 20) *</label>
-                        <div class="note" style="margin-bottom:12px">
-                            Track each fuel scoring cycle: hopper fill % and accuracy
-                        </div>
-                        <div id="autoCyclesContainer">
-                            <!-- Cycles will be dynamically added here -->
-                        </div>
-                        <button type="button" class="btn small ghost" id="addAutoCycle">+ Add Cycle</button>
-                    </div>
-
-                    <div class="col-12">
-                        <label>Where robot gets fuel *</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="fuelNeutralZone" />
-                                <span>Neutral Zone</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="fuelOutpost" />
-                                <span>Outpost</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="fuelDepot" />
-                                <span>Depot</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="fuelFloor" />
-                                <span>Floor</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <label>Did robot go over bump or under trench *</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="autoBumpOver" />
-                                <span>Over Bump</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="autoTrenchUnder" />
-                                <span>Under Trench</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="autoBumpTrenchNone" />
-                                <span>None</span>
-                            </label>
+                        <label>Auto Fuel Scored *</label>
+                        <div class="fuel-counter">
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small ghost fuel-btn" data-key="autoFuel" data-d="-10">-10</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="autoFuel" data-d="-5">-5</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="autoFuel" data-d="-1">-1</button>
+                            </div>
+                            <div class="fuel-value" id="autoFuelVal">0</div>
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small fuel-btn" data-key="autoFuel" data-d="1">+1</button>
+                                <button type="button" class="btn small fuel-btn" data-key="autoFuel" data-d="5">+5</button>
+                                <button type="button" class="btn small fuel-btn" data-key="autoFuel" data-d="10">+10</button>
+                            </div>
                         </div>
                     </div>
 
@@ -214,35 +180,36 @@
             <section class="screen" data-screen="2" style="display:none">
                 <div class="grid">
                     <div class="col-12">
-                        <label>Teleop Fuel Cycles (max 20) *</label>
-                        <div class="note" style="margin-bottom:12px">
-                            Track each fuel scoring cycle: hopper fill % and accuracy
+                        <label>Active Shift 1 Fuel *</label>
+                        <div class="fuel-counter">
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small ghost fuel-btn" data-key="activeShift1Fuel" data-d="-10">-10</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="activeShift1Fuel" data-d="-5">-5</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="activeShift1Fuel" data-d="-1">-1</button>
+                            </div>
+                            <div class="fuel-value" id="shift1FuelVal">0</div>
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small fuel-btn" data-key="activeShift1Fuel" data-d="1">+1</button>
+                                <button type="button" class="btn small fuel-btn" data-key="activeShift1Fuel" data-d="5">+5</button>
+                                <button type="button" class="btn small fuel-btn" data-key="activeShift1Fuel" data-d="10">+10</button>
+                            </div>
                         </div>
-                        <div id="teleopCyclesContainer">
-                            <!-- Cycles will be dynamically added here -->
-                        </div>
-                        <button type="button" class="btn small ghost" id="addTeleopCycle">+ Add Cycle</button>
                     </div>
 
                     <div class="col-12">
-                        <label>Where robot gets fuel *</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="teleopFuelNeutralZone" />
-                                <span>Neutral Zone</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="teleopFuelOutpost" />
-                                <span>Outpost</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="teleopFuelDepot" />
-                                <span>Depot</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="teleopFuelFloor" />
-                                <span>Floor</span>
-                            </label>
+                        <label>Active Shift 2 Fuel *</label>
+                        <div class="fuel-counter">
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small ghost fuel-btn" data-key="activeShift2Fuel" data-d="-10">-10</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="activeShift2Fuel" data-d="-5">-5</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="activeShift2Fuel" data-d="-1">-1</button>
+                            </div>
+                            <div class="fuel-value" id="shift2FuelVal">0</div>
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small fuel-btn" data-key="activeShift2Fuel" data-d="1">+1</button>
+                                <button type="button" class="btn small fuel-btn" data-key="activeShift2Fuel" data-d="5">+5</button>
+                                <button type="button" class="btn small fuel-btn" data-key="activeShift2Fuel" data-d="10">+10</button>
+                            </div>
                         </div>
                     </div>
 
@@ -295,8 +262,8 @@
                         </div>
                     </div>
 
-                    <div class="col-12">
-                        <label>Where robot climbed on tower *</label>
+                    <div class="col-12" id="climbSelectorWrapper" style="display:none">
+                        <label>Where robot climbed on tower</label>
                         <div class="tower-selector-zones" id="climbSelector">
                             <img src="images/tower.png" alt="Tower diagram" draggable="false" />
                             <div class="tower-zones">
@@ -321,6 +288,23 @@
                         <div class="seg" id="shotInHubSeg">
                             <div class="chip" data-value="Yes">Yes</div>
                             <div class="chip" data-value="No">No</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label>Endgame Fuel Scored *</label>
+                        <div class="fuel-counter">
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small ghost fuel-btn" data-key="endgameFuel" data-d="-10">-10</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="endgameFuel" data-d="-5">-5</button>
+                                <button type="button" class="btn small ghost fuel-btn" data-key="endgameFuel" data-d="-1">-1</button>
+                            </div>
+                            <div class="fuel-value" id="endgameFuelVal">0</div>
+                            <div class="fuel-btns">
+                                <button type="button" class="btn small fuel-btn" data-key="endgameFuel" data-d="1">+1</button>
+                                <button type="button" class="btn small fuel-btn" data-key="endgameFuel" data-d="5">+5</button>
+                                <button type="button" class="btn small fuel-btn" data-key="endgameFuel" data-d="10">+10</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -362,25 +346,6 @@
                             <option value="Elite">Elite</option>
                         </select>
                     </div>
-
-                    <div class="col-12">
-                        <label>Crossed bump *</label>
-                        <div class="seg" id="crossedBumpSeg">
-                            <div class="chip" data-value="Yes">Yes</div>
-                            <div class="chip" data-value="No">No</div>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <label>Crossed under trench *</label>
-                        <div class="seg" id="crossedTrenchSeg">
-                            <div class="chip" data-value="Yes">Yes</div>
-                            <div class="chip" data-value="No">No</div>
-                        </div>
-
-                    </div>
-
-                   
 
                     <div class="col-12">
                         <label>Additional comments</label>

@@ -209,21 +209,6 @@ function writeToSheetMatch(data) {
   // Parse timestamp
   const timestamp = data.timestampISO ? new Date(data.timestampISO) : new Date();
 
-  // Helper function to extract cycle data
-  const getCycleData = (cycles, maxCycles) => {
-    const cycleData = [];
-    for (let i = 0; i < maxCycles; i++) {
-      if (cycles && cycles[i]) {
-        cycleData.push(cycles[i].hopperFill || 0);
-        cycleData.push(cycles[i].accuracy || 0);
-      } else {
-        cycleData.push("");  // Empty if cycle doesn't exist
-        cycleData.push("");
-      }
-    }
-    return cycleData;
-  };
-
   // Build row array (ordered to match HTML form flow)
   const row = [
     // System & General (Screen 0)
@@ -237,24 +222,14 @@ function writeToSheetMatch(data) {
 
     // Auto (Screen 1)
     data.startPos || "",                // Start Position
-    ...getCycleData(data.autoCycles, 20), // Auto Cycles 1-20 (Hopper %, Accuracy %)
-    data.fuelNeutralZone ? "Yes" : "No", // Auto - Fuel From Neutral Zone
-    data.fuelOutpost ? "Yes" : "No",    // Auto - Fuel From Outpost
-    data.fuelDepot ? "Yes" : "No",      // Auto - Fuel From Depot
-    data.fuelFloor ? "Yes" : "No",      // Auto - Fuel From Floor
-    data.autoBumpOver ? "Yes" : "No",   // Over Bump
-    data.autoTrenchUnder ? "Yes" : "No", // Under Trench
-    data.autoBumpTrenchNone ? "Yes" : "No", // Bump/Trench None
+    data.autoFuel || 0,                 // Auto Fuel Scored
     data.autoShuttling || "",           // Auto Shuttling
     data.autoTower || "NONE",           // Auto Tower
     data.autoTowerPoints || 0,          // Auto Tower Pts
 
     // Teleop (Screen 2)
-    ...getCycleData(data.teleopCycles, 20), // Teleop Cycles 1-20 (Hopper %, Accuracy %)
-    data.teleopFuelNeutralZone ? "Yes" : "No", // Teleop - Fuel From Neutral Zone
-    data.teleopFuelOutpost ? "Yes" : "No",     // Teleop - Fuel From Outpost
-    data.teleopFuelDepot ? "Yes" : "No",       // Teleop - Fuel From Depot
-    data.teleopFuelFloor ? "Yes" : "No",       // Teleop - Fuel From Floor
+    data.activeShift1Fuel || 0,         // Active Shift 1 Fuel
+    data.activeShift2Fuel || 0,         // Active Shift 2 Fuel
     data.inactivePlayedDefense ? "Yes" : "No", // Inactive - Played Defense
     data.inactiveShuttledFuel ? "Yes" : "No",  // Inactive - Shuttled Fuel
     data.inactiveBlockedBumpTrench ? "Yes" : "No", // Inactive - Blocked Bump/Trench
@@ -266,13 +241,12 @@ function writeToSheetMatch(data) {
     data.teleopTowerPoints || 0,        // Endgame Tower Pts
     data.climbPos || "",                // Climb Position
     data.shotInHub || "",               // Shot In Hub
+    data.endgameFuel || 0,             // Endgame Fuel Scored
 
     // Misc (Screen 4)
     data.affectedByDefense || "",       // Affected By Defense
     data.robotStatus || "",             // Robot Status
     data.defenseRating || "",           // Defense Rating
-    data.crossedBump || "",             // Crossed Bump
-    data.crossedTrench || "",           // Crossed Trench
     data.comments || "",                // Comments
     data.rank || ""                     // Rank (1-3)
   ];
@@ -319,7 +293,6 @@ function writeToSheetPit(data) {
 
     // Robot Design
     data.drivetrain || "",              // Drivetrain Type
-    data.motorType || "",               // Motor Type
     data.width || "",                   // Width (inches)
     data.length || "",                  // Length (inches)
     data.height || "",                  // Height (inches)
@@ -340,7 +313,7 @@ function writeToSheetPit(data) {
   sheet.appendRow(row);
 
   const currentRow = sheet.getLastRow();
-  const photoColumn = 19; // Column S (19th column) - the Photo column
+  const photoColumn = 18; // Column R (18th column) - the Photo column
 
   // Insert robot photo if provided
   if (data.robotPhoto && data.robotPhoto.length > 0) {
@@ -410,19 +383,6 @@ function getOrCreateImageFolder() {
  * Create header row for MATCH scouting
  */
 function createHeadersMatch(sheet) {
-  // Generate cycle headers
-  const autoCycleHeaders = [];
-  for (let i = 1; i <= 20; i++) {
-    autoCycleHeaders.push(`Auto Cycle ${i} Hopper %`);
-    autoCycleHeaders.push(`Auto Cycle ${i} Accuracy %`);
-  }
-
-  const teleopCycleHeaders = [];
-  for (let i = 1; i <= 20; i++) {
-    teleopCycleHeaders.push(`Teleop Cycle ${i} Hopper %`);
-    teleopCycleHeaders.push(`Teleop Cycle ${i} Accuracy %`);
-  }
-
   const headers = [
     // System & General (Screen 0)
     "Timestamp",
@@ -434,23 +394,13 @@ function createHeadersMatch(sheet) {
     "Alliance",
     // Auto (Screen 1)
     "Start Position",
-    ...autoCycleHeaders,  // Auto Cycles 1-20
-    "Auto - Fuel From Neutral Zone",
-    "Auto - Fuel From Outpost",
-    "Auto - Fuel From Depot",
-    "Auto - Fuel From Floor",
-    "Over Bump",
-    "Under Trench",
-    "Bump/Trench None",
+    "Auto Fuel Scored",
     "Auto Shuttling",
     "Auto Tower",
     "Auto Tower Pts",
     // Teleop (Screen 2)
-    ...teleopCycleHeaders,  // Teleop Cycles 1-20
-    "Teleop - Fuel From Neutral Zone",
-    "Teleop - Fuel From Outpost",
-    "Teleop - Fuel From Depot",
-    "Teleop - Fuel From Floor",
+    "Active Shift 1 Fuel",
+    "Active Shift 2 Fuel",
     "Inactive - Played Defense",
     "Inactive - Shuttled Fuel",
     "Inactive - Blocked Bump/Trench",
@@ -461,12 +411,11 @@ function createHeadersMatch(sheet) {
     "Endgame Tower Pts",
     "Climb Position",
     "Shot In Hub",
+    "Endgame Fuel Scored",
     // Misc (Screen 4)
     "Affected By Defense",
     "Robot Status",
     "Defense Rating",
-    "Crossed Bump",
-    "Crossed Trench",
     "Comments",
     "Rank (1-3)"
   ];
@@ -505,7 +454,6 @@ function createHeadersPit(sheet) {
 
     // Robot Design
     "Drivetrain Type",
-    "Motor Type",
     "Width (in)",
     "Length (in)",
     "Height (in)",
@@ -561,32 +509,13 @@ function testMatchScouting() {
     alliance: "Blue",
     // Auto
     startPos: "1",
-    autoCycles: [
-      { hopperFill: 50, accuracy: 75 },
-      { hopperFill: 60, accuracy: 100 },
-      { hopperFill: 45, accuracy: 50 }
-    ],
-    fuelNeutralZone: true,
-    fuelOutpost: false,
-    fuelDepot: true,
-    fuelFloor: false,
-    autoBumpOver: true,
-    autoTrenchUnder: false,
-    autoBumpTrenchNone: false,
+    autoFuel: 12,
     autoShuttling: "Yes",
     autoTower: "L1",
     autoTowerPoints: 15,
     // Teleop
-    teleopCycles: [
-      { hopperFill: 80, accuracy: 100 },
-      { hopperFill: 70, accuracy: 75 },
-      { hopperFill: 90, accuracy: 100 },
-      { hopperFill: 85, accuracy: 100 }
-    ],
-    teleopFuelNeutralZone: true,
-    teleopFuelOutpost: true,
-    teleopFuelDepot: false,
-    teleopFuelFloor: false,
+    activeShift1Fuel: 25,
+    activeShift2Fuel: 15,
     inactivePlayedDefense: true,
     inactiveShuttledFuel: false,
     inactiveBlockedBumpTrench: true,
@@ -597,12 +526,11 @@ function testMatchScouting() {
     teleopTowerPoints: 20,
     climbPos: "Center",
     shotInHub: "Yes",
+    endgameFuel: 5,
     // Misc
     affectedByDefense: "No",
     robotStatus: "OK",
     defenseRating: "Strong",
-    crossedBump: "Yes",
-    crossedTrench: "No",
     comments: "Great robot, very consistent!",
     rank: "1",
     submitCode: "1792x1259"
@@ -639,7 +567,6 @@ function testPitScouting() {
 
     // Robot Design
     drivetrain: "Swerve",
-    motorType: "NEO",
     width: "28",
     length: "32",
     height: "48",
