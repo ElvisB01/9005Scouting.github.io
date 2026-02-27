@@ -726,19 +726,32 @@
     }
 
     async function postToWebhook(payloadObj){
-        console.log("Posting to webhook");
         const body = "payload=" + encodeURIComponent(JSON.stringify(payloadObj));
-
-        await fetch(CONFIG.WEBHOOK_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-            body: body
+      
+        const res = await fetch(CONFIG.WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body
         });
-
-        console.log("Request sent (no-cors mode)");
+      
+        const text = await res.text();
+        console.log("Webhook status:", res.status);
+        console.log("Webhook response:", text);
+      
+        // If Apps Script returns error JSON, surface it
+        try {
+          const json = JSON.parse(text);
+          if (json.status && json.status !== "success") {
+            throw new Error(json.message || "Webhook error");
+          }
+        } catch (_) {
+          // ignore JSON parse if it's not JSON
+        }
+      
+        if (!res.ok) throw new Error("Webhook HTTP " + res.status);
+      
         return true;
-    }
+      }
 
     $("btnResend").addEventListener("click", resendQueued);
 
