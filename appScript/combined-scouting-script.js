@@ -1,5 +1,5 @@
 /**
- * FRC 1792 Combined Scouting Data Receiver - Google Apps Script (2026)
+ * FRC 9005 Combined Scouting Data Receiver - Google Apps Script (2026)
  * Handles BOTH Match Scouting and Pit Scouting submissions
  * Routes data to different tabs based on scoutingType field
  *
@@ -166,7 +166,7 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({
       status: "ok",
-      message: "FRC 1792 Combined Scouting Webhook (2026) is running",
+      message: "FRC 9005 Combined Scouting Webhook (2026) is running",
       timestamp: new Date().toISOString(),
       matchSheet: {
         name: MATCH_SHEET_NAME,
@@ -381,7 +381,7 @@ function writeToSheetPit(data) {
  * Get or create a folder for robot images in Google Drive
  */
 function getOrCreateImageFolder() {
-  const folderName = "FRC 1792 Robot Photos";
+  const folderName = "FRC 9005 Robot Photos";
   const folders = DriveApp.getFoldersByName(folderName);
 
   if (folders.hasNext()) {
@@ -529,10 +529,10 @@ function testMatchScouting() {
   const testData = {
     timestampISO: new Date().toISOString(),
     studentName: "Test Scout",
-    scoutTeam: "1792",
-    eventCode: "2026wiapp",
+    scoutTeam: "9005",
+    eventCode: "2026nccab",
     matchNumber: 999,
-    teamNumber: 1792,
+    teamNumber: 9005,
     alliance: "Blue",
     // Auto
     startPos: "1",
@@ -578,7 +578,7 @@ function testMatchScouting() {
   try {
     writeToSheetMatch(testData);
     Logger.log("✓✓✓ MATCH TEST SUCCESSFUL!");
-    Browser.msgBox("Success!", "Check 'Match Scouting Data' tab for test data (Match 999, Team 1792)", Browser.Buttons.OK);
+    Browser.msgBox("Success!", "Check 'Match Scouting Data' tab for test data (Match 999, Team 9005)", Browser.Buttons.OK);
     return "✓ Match test successful! Check sheet for Match 999.";
   } catch (error) {
     Logger.log("✗✗✗ MATCH TEST FAILED: " + error.toString());
@@ -600,9 +600,9 @@ function testPitScouting() {
     scoutingType: "PIT",
     timestampISO: new Date().toISOString(),
     scoutName: "Test Scout",
-    eventCode: "2026wiapp",
-    teamNumber: 1792,
-    teamName: "Round Table Robotics",
+    eventCode: "2026nccab",
+    teamNumber: 9005,
+    teamName: "Avian Robotics",
 
     // Robot Design
     drivetrain: "Swerve",
@@ -626,8 +626,8 @@ function testPitScouting() {
   try {
     writeToSheetPit(testData);
     Logger.log("✓✓✓ PIT TEST SUCCESSFUL!");
-    Browser.msgBox("Success!", "Check 'Pit Scouting Data' tab for test data (Team 1792).\n\nYou should see:\n- A red square test image\n- '✓ Photo' text in the cell\n\nReal robot photos will be full-size.", Browser.Buttons.OK);
-    return "✓ Pit test successful! Check sheet for Team 1792.";
+    Browser.msgBox("Success!", "Check 'Pit Scouting Data' tab for test data (Team 9005).\n\nYou should see:\n- A red square test image\n- '✓ Photo' text in the cell\n\nReal robot photos will be full-size.", Browser.Buttons.OK);
+    return "✓ Pit test successful! Check sheet for Team 9005.";
   } catch (error) {
     Logger.log("✗✗✗ PIT TEST FAILED: " + error.toString());
     Logger.log("Stack trace: " + error.stack);

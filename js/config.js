@@ -1,6 +1,6 @@
 /*
  * ============================================
- *  FRC 1792 SCOUTING - SHARED CONFIGURATION
+ *  FRC 9005 SCOUTING - SHARED CONFIGURATION
  * ============================================
  *
  *  This is the ONLY file you need to edit
