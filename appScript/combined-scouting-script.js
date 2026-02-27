@@ -23,7 +23,7 @@ const PIT_SHEET_NAME = "Pit Scouting Data";
 
 // Allowed team codes for submission (server-side security gate)
 // Add codes here for each allied team that should be able to submit data
-const ALLOWED_CODES = ["letsfly"]; // Example: ["knights", "roundtable"]
+const ALLOWED_CODES = ["avian9005"]; // Example: ["knights", "roundtable"]
 
 /**
  * Handle POST requests from both scouting apps
