@@ -428,7 +428,6 @@
     function validateRobotDesign(){
         const drivetrain = $("drivetrain").value;
         const motorType = $("motorType").value;
-        const programmingLang = $("programmingLang").value;
         const width = $("width").value.trim();
         const length = $("length").value.trim();
         const height = $("height").value.trim();
